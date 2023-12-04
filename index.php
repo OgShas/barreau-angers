@@ -37,11 +37,13 @@ include 'src/MyCrawler.php';
             'Restation de serment' => Dom::cssSelector('.w-50')->first()->innerText(),
             'Email' => Dom::cssSelector('.email')->first()->innerText(),
             'Phone' => Dom::cssSelector('.telephone')->first()->innerText(),
+            'Site-Web' => Dom::cssSelector('.site_web')->first()->link(),
     ])
     ->addToResult([
         'Address',
         'Restation de serment',
         'Email',
-        'Phone'
+        'Phone',
+        'Site-Web'
     ])
     )->runAndTraverse();
