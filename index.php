@@ -5,6 +5,7 @@ use Crwlr\Crawler\Steps\Html;
 use Crwlr\Crawler\Steps\Loading\Http;
 use Crwlr\Crawler\Stores\SimpleCsvFileStore;
 use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
 use MyCrawler\MyCrawler;
 
@@ -58,7 +59,10 @@ include 'src/MyCrawler.php';
 
                     try {
                         $phoneNumberProto = $phoneUtil->parse($PhoneNumber, "FR");
-                        return $phoneNumberProto;
+
+                        $formattedPhoneNumber = $phoneUtil->format($phoneNumberProto, PhoneNumberFormat::INTERNATIONAL);
+
+                        return $formattedPhoneNumber;
                     } catch (NumberParseException $e) {
                         return null;
                     }
@@ -82,7 +86,10 @@ include 'src/MyCrawler.php';
 
                     try {
                         $phoneNumberProto = $phoneUtil->parse($PhoneNumber, "FR");
-                        return $phoneNumberProto;
+
+                        $formattedPhoneNumber = $phoneUtil->format($phoneNumberProto, PhoneNumberFormat::INTERNATIONAL);
+
+                        return $formattedPhoneNumber;
                     } catch (NumberParseException $e) {
                         return null;
                     }
