@@ -38,30 +38,65 @@ include 'src/MyCrawler.php';
             'Address' => Dom::cssSelector('.adresse')->text(),
             'Restation de serment' => Dom::cssSelector('.w-50')->first()->innerText(),
             'Email' => Dom::cssSelector('.email')->first()->innerText(),
-            'Phone' => Dom::cssSelector('.telephone')->first()->innerText(),
+            'Phone1' => Dom::cssSelector('.telephone')->first()->innerText(),
+            'Phone2' => Dom::cssSelector('.telephone')->first()->innerText(),
             'Site-Web' => Dom::cssSelector('.site_web')->first()->link(),
     ])
-            ->refineOutput('Phone', function (mixed $output) {
+
+            //Phone number first
+            ->refineOutput('Phone1', function (mixed $output) {
                 if (is_array($output)) {
                     return $output;
                 }
 
-                $PhoneNumber = $output;
-                $phoneUtil = PhoneNumberUtil::getInstance();
-                try {
-                    $phoneNumberProto = $phoneUtil->parse($PhoneNumber, "FR");
-                    // Return the parsed phone number instead of dumping it
-                    return $phoneNumberProto;
-                } catch (NumberParseException $e) {
-                    // Handle parsing failure if needed
-                    return null; // or return an error message
+                $parts = preg_split('/[\/-]/', $output);
+                if (isset($parts[0])) {
+                    $result = $parts[0];
+
+                    $PhoneNumber = $result;
+                    $phoneUtil = PhoneNumberUtil::getInstance();
+
+                    try {
+                        $phoneNumberProto = $phoneUtil->parse($PhoneNumber, "FR");
+                        return $phoneNumberProto;
+                    } catch (NumberParseException $e) {
+                        return null;
+                    }
                 }
+
+                return null;
             })
+
+            //Phone number second
+            ->refineOutput('Phone2', function (mixed $output) {
+                if (is_array($output)) {
+                    return $output;
+                }
+
+                $parts = preg_split('/[\/-]/', $output);
+                if (isset($parts[1])) {
+                    $result = $parts[1];
+
+                    $PhoneNumber = $result;
+                    $phoneUtil = PhoneNumberUtil::getInstance();
+
+                    try {
+                        $phoneNumberProto = $phoneUtil->parse($PhoneNumber, "FR");
+                        return $phoneNumberProto;
+                    } catch (NumberParseException $e) {
+                        return null;
+                    }
+                }
+
+                return null;
+            })
+
     ->addToResult([
         'Address',
         'Restation de serment',
         'Email',
-        'Phone',
+        'Phone1',
+        'Phone2',
         'Site-Web'
     ])
     )->runAndTraverse();
