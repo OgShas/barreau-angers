@@ -8,6 +8,8 @@ use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
 use MyCrawler\MyCrawler;
+use function Symfony\Component\String\u;
+
 
 require_once  __DIR__ . '/vendor/autoload.php';
 include 'src/MyCrawler.php';
@@ -21,9 +23,31 @@ include 'src/MyCrawler.php';
     ->addStep(
         Html::each('.container .liste_avocats [class^="avocat_vignette"]')
         ->extract([
-            'Name' => Dom::cssSelector('.infos_avocat h3')->first()->innerText(),
+            'Full Name' => Dom::cssSelector('.infos_avocat h3')->first()->innerText(),
+            'First Name' => Dom::cssSelector('.infos_avocat h3')->first()->innerText(),
+            'Last Name' => Dom::cssSelector('.infos_avocat h3')->first()->innerText(),
             'Link' => Dom::cssSelector('a')->first()->link(),
-        ])->addLaterToResult()
+        ])
+
+            ->refineOutput('First Name', function (mixed $output) {
+                if (is_string($output)) {
+                    return u($output)->split(' ', 2)[0]->toString();
+                }
+
+                return $output;
+            })
+            ->refineOutput('Last Name', function (mixed $output) {
+                if (is_string($output)) {
+                    return u($output)->split(' ', 2)[1]->toString();
+                }
+
+                return $output;
+            })
+            ->addToResult([
+                'Full Name',
+                'First Name',
+                'Last Name',
+            ])
     )
     ->addStep(
         Http::get()
@@ -36,16 +60,37 @@ include 'src/MyCrawler.php';
         ->useInputKey('Link-Response')
         ->keepInputData()
     ->extract([
-            'Address' => Dom::cssSelector('.adresse')->text(),
-            'Restation de serment' => Dom::cssSelector('.w-50')->first()->innerText(),
+            'Mailing City' => Dom::cssSelector('.adresse')->text(),  //format
+            'Mailing Street' => Dom::cssSelector('.adresse')->last()->innerText(),
+            'Mailing Postal Code' => Dom::cssSelector('.adresse')->last()->innerText(), //format
+            'Assermenté(e) en' => Dom::cssSelector('.w-50')->first()->innerText(),
+            'Prestation de serment' => Dom::cssSelector('.w-50')->first()->innerText(),
             'Email' => Dom::cssSelector('.email')->first()->innerText(),
-            'Phone1' => Dom::cssSelector('.telephone')->first()->innerText(),
-            'Phone2' => Dom::cssSelector('.telephone')->first()->innerText(),
+            'Mobile' => Dom::cssSelector('.telephone')->first()->innerText(),
+            'Phone' => Dom::cssSelector('.telephone')->first()->innerText(),
             'Site-Web' => Dom::cssSelector('.site_web')->first()->link(),
+            'Barreau'=>Dom::cssSelector('.w-50')->text(),   // format
+            'country Code'=> 'No Selector',
+            'Mailing Country' => 'No Selector',
+            'Entity'=>'No Selector',
+            'Status Prospect' => 'No Selector',
+            'Numéro de toque' => 'No Selector',
     ])
+            //refine year
+            ->refineOutput('Assermenté(e) en', function (mixed $output) {
+                if (is_array($output)) {
+                    return $output;
+                }
+                $output = str_replace('°', '', $output);
+
+                // Extract the last 4 digits
+                $output = substr($output, -4);
+
+                return $output;
+            })
 
             //Phone number first
-            ->refineOutput('Phone1', function (mixed $output) {
+            ->refineOutput('Mobile', function (mixed $output) {
                 if (is_array($output)) {
                     return $output;
                 }
@@ -72,7 +117,7 @@ include 'src/MyCrawler.php';
             })
 
             //Phone number second
-            ->refineOutput('Phone2', function (mixed $output) {
+            ->refineOutput('Phone', function (mixed $output) {
                 if (is_array($output)) {
                     return $output;
                 }
@@ -98,12 +143,35 @@ include 'src/MyCrawler.php';
                 return null;
             })
 
+            ->refineOutput(function (array $output) {
+                $output['country code'] = 'fr';
+                $output['Numéro de toque'] = 'null';
+                $output['Mailing Country'] = 'France';
+                $output['Région affiliée'] = 'Angers';
+                $output['Entity'] = 'LAW-FR';
+                $output['Statut Prospect'] = 'À qualifier';
+                $output['Status Prospect'] = 'Null';
+
+                return $output;
+            })
+
     ->addToResult([
-        'Address',
-        'Restation de serment',
+        'Mailing City',
+        'Mailing Street',
+        'Assermenté(e) en',
+        'Prestation de serment',
         'Email',
-        'Phone1',
-        'Phone2',
-        'Site-Web'
+        'Mobile',
+        'Phone',
+        'Site-Web',
+        'Barreau',
+        'country code',
+        'Mailing Country',
+        'Région affiliée',
+        'Entity',
+        'Statut Prospect',
+        'Numéro de toque',
+        'Status Prospect'
+
     ])
     )->runAndTraverse();
