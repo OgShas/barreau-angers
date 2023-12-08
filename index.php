@@ -60,22 +60,72 @@ include 'src/MyCrawler.php';
         ->useInputKey('Link-Response')
         ->keepInputData()
     ->extract([
-            'Mailing City' => Dom::cssSelector('.adresse')->text(),  //format
+            'Mailing City' => Dom::cssSelector('.adresse')->text(),
             'Mailing Street' => Dom::cssSelector('.adresse')->last()->innerText(),
-            'Mailing Postal Code' => Dom::cssSelector('.adresse')->last()->innerText(), //format
+            'Mailing Postal Code' => Dom::cssSelector('.adresse')->text(), //format
             'Assermenté(e) en' => Dom::cssSelector('.w-50')->first()->innerText(),
             'Prestation de serment' => Dom::cssSelector('.w-50')->first()->innerText(),
             'Email' => Dom::cssSelector('.email')->first()->innerText(),
             'Mobile' => Dom::cssSelector('.telephone')->first()->innerText(),
             'Phone' => Dom::cssSelector('.telephone')->first()->innerText(),
             'Site-Web' => Dom::cssSelector('.site_web')->first()->link(),
-            'Barreau'=>Dom::cssSelector('.w-50')->text(),   // format
+            'Barreau'=>Dom::cssSelector('p.w-50:nth-child(2)')->text(),
             'country Code'=> 'No Selector',
             'Mailing Country' => 'No Selector',
             'Entity'=>'No Selector',
             'Status Prospect' => 'No Selector',
             'Numéro de toque' => 'No Selector',
     ])
+
+
+            //refine Mailing Postal Code
+            ->refineOutput('Mailing Postal Code', function (mixed $output) {
+                if (is_array($output)) {
+                    return $output;
+                }
+                preg_match_all('/\d+/', $output, $matches);
+
+                if (!empty($matches[0])) {
+                    $maxNumber = max($matches[0]);
+
+                    return $maxNumber;
+                }
+                return null;
+            })
+
+            //refine barreau
+            ->refineOutput('Barreau', function (mixed $output) {
+                if (is_array($output)) {
+                    return $output;
+                }
+
+                $substring = ':';
+                $position = strpos($output, $substring);
+
+                if ($position !== false) {
+                    // Extract text after "Cabinet : "
+                    $result = substr($output, $position + strlen($substring));
+                    return $result;
+                }
+
+                return null;
+            })
+
+            //refine mailing city
+            ->refineOutput('Mailing City', function (mixed $output) {
+                if (is_array($output)) {
+                    return $output;
+                }
+
+                $allowedCities = ['CHOLET', 'ANGERS', 'BEAUCOUZE', 'PONTS', 'LOUROUX', 'TRELAZE', 'MORANNES', 'SEICHES', 'SEGRE', 'ERIGNE', 'TIERCE', 'LION', 'BARTHELEMY'];
+
+                preg_match_all('/\b([A-Z]+)\b/u', $output, $matches);
+
+                $filteredCities = array_intersect($matches[0], $allowedCities);
+
+                return implode(' | ', $filteredCities);
+            })
+
             //refine year
             ->refineOutput('Assermenté(e) en', function (mixed $output) {
                 if (is_array($output)) {
@@ -150,7 +200,6 @@ include 'src/MyCrawler.php';
                 $output['Région affiliée'] = 'Angers';
                 $output['Entity'] = 'LAW-FR';
                 $output['Statut Prospect'] = 'À qualifier';
-                $output['Status Prospect'] = 'Null';
 
                 return $output;
             })
@@ -158,6 +207,7 @@ include 'src/MyCrawler.php';
     ->addToResult([
         'Mailing City',
         'Mailing Street',
+        'Mailing Postal Code',
         'Assermenté(e) en',
         'Prestation de serment',
         'Email',
@@ -169,7 +219,6 @@ include 'src/MyCrawler.php';
         'Mailing Country',
         'Région affiliée',
         'Entity',
-        'Statut Prospect',
         'Numéro de toque',
         'Status Prospect'
 
