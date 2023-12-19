@@ -66,8 +66,8 @@ include 'src/MyCrawler.php';
             'Assermenté(e) en' => Dom::cssSelector('.w-50')->first()->innerText(),
             'Prestation de serment' => Dom::cssSelector('.w-50')->first()->innerText(),
             'Email' => Dom::cssSelector('.email')->first()->innerText(),
-            'Mobile' => Dom::cssSelector('.telephone')->first()->innerText(),
             'Phone' => Dom::cssSelector('.telephone')->first()->innerText(),
+            'Mobile' => Dom::cssSelector('.telephone')->first()->innerText(),
             'Site-Web' => Dom::cssSelector('.site_web')->first()->link(),
             'Barreau'=>Dom::cssSelector('p.w-50:nth-child(2)')->text(),
             'country Code'=> 'No Selector',
@@ -140,7 +140,7 @@ include 'src/MyCrawler.php';
             })
 
             //Phone number first
-            ->refineOutput('Mobile', function (mixed $output) {
+            ->refineOutput('Phone', function (mixed $output) {
                 if (is_array($output)) {
                     return $output;
                 }
@@ -167,7 +167,7 @@ include 'src/MyCrawler.php';
             })
 
             //Phone number second
-            ->refineOutput('Phone', function (mixed $output) {
+            ->refineOutput('Mobile', function (mixed $output) {
                 if (is_array($output)) {
                     return $output;
                 }
