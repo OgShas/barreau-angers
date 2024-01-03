@@ -1,6 +1,6 @@
 <?php
 
-namespace MyCrawler;
+namespace Crawler;
 
 use Crwlr\Crawler\Cache\FileCache;
 use Crwlr\Crawler\HttpCrawler;
