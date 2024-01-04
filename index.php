@@ -99,16 +99,9 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
                 if (is_array($output)) {
                     return $output;
                 }
+                $newData = substr($output, strpos($output, ':') + 1);
 
-                $substring = ':';
-                $position = strpos($output, $substring);
-
-                if ($position !== false) {
-                    $result = substr($output, $position + strlen($substring));
-                    return $result;
-                }
-
-                return null;
+                return trim($newData);
             })
             ->refineOutput('Mailing City', function (mixed $output) {
                 if (is_array($output)) {
@@ -143,7 +136,7 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
                     $parts = preg_split('/[\/-]/', $output);
                     $result = $parts[0];
 
-                    if($result === ''){
+                    if ($result === '') {
                         return $output;
                     }
 
@@ -174,7 +167,7 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
             })
             ->refineOutput(function (array $output) {
                 $output['country code'] = 'fr';
-                $output['Numéro de toque'] = 'null';
+                $output['Numéro de toque'] = null;
                 $output['Mailing Country'] = 'France';
                 $output['Région affiliée'] = 'Angers';
                 $output['Entity'] = 'LAW-FR';
@@ -198,7 +191,7 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
                 'Région affiliée',
                 'Entity',
                 'Numéro de toque',
-                'Status Prospect'
+                'Statut Prospect'
 
             ])
     )->runAndTraverse();
