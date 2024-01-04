@@ -13,16 +13,13 @@ use Psr\Log\LoggerInterface;
 
 class MyCrawler extends HttpCrawler
 {
-
     protected function userAgent(): UserAgentInterface
     {
        return BotUserAgent::make('petalbot');
     }
 
-
     protected function loader(UserAgentInterface $userAgent, LoggerInterface $logger): LoaderInterface|array
     {
-
         $loader = new HttpLoader(
             $userAgent ,
             logger: $logger,
@@ -43,11 +40,9 @@ class MyCrawler extends HttpCrawler
 
         $loader
             ->throttle()
-            ->waitBetween(new MultipleOf(10.0), new MultipleOf(15.0))
+            ->waitBetween(new MultipleOf(2.0), new MultipleOf(4.0))
             ;
 
         return $loader;
-
     }
-
 }
