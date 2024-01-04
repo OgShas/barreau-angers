@@ -67,7 +67,7 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
                 'Phone' => Dom::cssSelector('.telephone')->first()->innerText(),
                 'Mobile' => Dom::cssSelector('.telephone')->first()->innerText(),
                 'Site-Web' => Dom::cssSelector('.site_web')->first()->link(),
-                'Barreau' => Dom::cssSelector('p.w-50:nth-child(2)')->text(),
+                'Barreau' => 'Invalid selector',
                 'country Code' => 'No Selector',
                 'Mailing Country' => 'No Selector',
                 'Entity' => 'No Selector',
@@ -94,14 +94,6 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
                     return $maxNumber;
                 }
                 return null;
-            })
-            ->refineOutput('Barreau', function (mixed $output) {
-                if (is_array($output)) {
-                    return $output;
-                }
-                $newData = substr($output, strpos($output, ':') + 1);
-
-                return trim($newData);
             })
             ->refineOutput('Mailing City', function (mixed $output) {
                 if (is_array($output)) {
@@ -172,6 +164,7 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
                 $output['Région affiliée'] = 'Angers';
                 $output['Entity'] = 'LAW-FR';
                 $output['Statut Prospect'] = 'À qualifier';
+                $output['Barreau'] = 'Angers';
 
                 return $output;
             })
