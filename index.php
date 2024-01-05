@@ -58,9 +58,9 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
             ->useInputKey('Link-Response')
             ->keepInputData()
             ->extract([
-                'Mailing City' => Dom::cssSelector('.adresse')->text(),
-                'Mailing Street' => Dom::cssSelector('.adresse')->last()->innerText(),
-                'Mailing Postal Code' => Dom::cssSelector('.adresse')->text(),
+                'Mailing City' => Dom::cssSelector('.adresse')->html(),
+                'Mailing Street' => Dom::cssSelector('.adresse')->html(),
+                'Mailing Postal Code' => Dom::cssSelector('.adresse')->html(),
                 'Assermenté(e) en' => Dom::cssSelector('.w-50')->first()->innerText(),
                 'Prestation de serment' => Dom::cssSelector('.w-50')->first()->innerText(),
                 'Email' => Dom::cssSelector('.email')->first()->innerText(),
@@ -86,27 +86,35 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
                 if (is_array($output)) {
                     return $output;
                 }
-                preg_match_all('/49\d+/', $output, $matches);
 
-                if (!empty($matches[0])) {
-                    $maxNumber = max($matches[0]);
-
-                    return $maxNumber;
+                $output = u($output)->after('<br>')->split(' ', 2)[0]->trim()->toString();;
+                return $output;
+            })
+            ->refineOutput('Mailing Street', function (mixed $output) {
+                if (is_array($output)) {
+                    return $output;
                 }
-                return null;
+
+                if ($output === '') {
+                    return null;
+                }
+                $output = u($output)->before('<br>')->trim()->toString();;
+                return $output;
             })
             ->refineOutput('Mailing City', function (mixed $output) {
                 if (is_array($output)) {
                     return $output;
                 }
 
-                if (preg_match_all('/\b(\d+[^A-Z\d]+)?([A-Z][A-Z\s\'-]+)\b/u', $output, $matches)) {
-                    $cities = end($matches[2]);
+                $output = u($output);
+                $splitResult = $output->after('<br>')->split(' ', 2);
 
-                    return $cities;
+                if (array_key_exists(1, $splitResult)) {
+                    $refineOutput = u($output)->after('<br>')->split(' ', 2)[1]->trim()->toString();
+                    return $refineOutput;
+                } else {
+                    return null;
                 }
-
-                return '';
             })
             ->refineOutput('Assermenté(e) en', function (mixed $output) {
                 if (is_array($output)) {
