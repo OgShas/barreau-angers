@@ -1,5 +1,6 @@
 <?php
 
+use Crawler\MyCrawler;
 use Crwlr\Crawler\Steps\Dom;
 use Crwlr\Crawler\Steps\Html;
 use Crwlr\Crawler\Steps\Loading\Http;
@@ -7,7 +8,6 @@ use Crwlr\Crawler\Stores\SimpleCsvFileStore;
 use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
-use Crawler\MyCrawler;
 use function Symfony\Component\String\u;
 
 require_once __DIR__ . '/vendor/autoload.php';
@@ -145,6 +145,7 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
                 }
 
                 $parts = preg_split('/[\/-]/', $output);
+
                 if (isset($parts[1])) {
                     $result = $parts[1];
 
@@ -185,6 +186,6 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
                 'Entity',
                 'Numéro de toque',
                 'Statut Prospect'
-
             ])
-    )->runAndTraverse();
+    )
+    ->runAndTraverse();
