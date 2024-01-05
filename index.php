@@ -86,7 +86,7 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
                 if (is_array($output)) {
                     return $output;
                 }
-                preg_match_all('/\d+/', $output, $matches);
+                preg_match_all('/49\d+/', $output, $matches);
 
                 if (!empty($matches[0])) {
                     $maxNumber = max($matches[0]);
