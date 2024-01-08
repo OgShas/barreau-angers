@@ -67,6 +67,7 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
                 'Phone' => Dom::cssSelector('.telephone')->first()->innerText(),
                 'Mobile' => Dom::cssSelector('.telephone')->first()->innerText(),
                 'Site-Web' => Dom::cssSelector('.site_web')->first()->link(),
+                'specialities' => Dom::cssSelector('div:nth-child(2) > p.domaine')->text(),
                 'Barreau' => 'Invalid selector',
                 'country Code' => 'No Selector',
                 'Mailing Country' => 'No Selector',
@@ -74,6 +75,12 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
                 'Status Prospect' => 'No Selector',
                 'Numéro de toque' => 'No Selector',
             ])
+            ->refineOutput('specialities', function (mixed $output) {
+                if (is_array($output)) {
+                    return $output;
+                }
+                return str_replace(['Domaine d\'activité : ', 'Domaines d\'activités : '], '', $output);
+            })
             ->refineOutput('Email', function (mixed $output) {
                 if (is_array($output)) {
                     return $output;
@@ -193,7 +200,8 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
                 'Région affiliée',
                 'Entity',
                 'Numéro de toque',
-                'Statut Prospect'
+                'Statut Prospect',
+                'specialities'
             ])
     )
     ->runAndTraverse();
