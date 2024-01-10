@@ -68,6 +68,7 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
                 'Mobile' => Dom::cssSelector('.telephone')->first()->innerText(),
                 'Site-Web' => Dom::cssSelector('.site_web')->first()->link(),
                 'Specialities' => Dom::cssSelector('div:nth-child(2) > p.domaine')->text(),
+                'Law firm name' => Dom::cssSelector('div:nth-child(2) > div:nth-child(4) > p:nth-child(2)')->text(),
                 'Barreau' => 'invalid-selector',
                 'country Code' => 'invalid-selector',
                 'Mailing Country' => 'invalid-selector',
@@ -75,6 +76,18 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
                 'Status Prospect' => 'invalid-selector',
                 'Numéro de toque' => 'invalid-selector',
             ])
+            ->refineOutput('Law firm name', function (mixed $output) {
+                if (is_array($output)) {
+                    return $output;
+                }
+
+                $output = explode('Cabinet : ', $output);
+                if (isset($output[1])) {
+                    return $output[1];
+                } else {
+                    return null;
+                }
+            })
             ->refineOutput('Specialities', function (mixed $output) {
                 if (is_array($output)) {
                     return $output;
@@ -201,7 +214,8 @@ $phoneNumberUtil = PhoneNumberUtil::getInstance();
                 'Entity',
                 'Numéro de toque',
                 'Statut Prospect',
-                'Specialities'
+                'Specialities',
+                'Law firm name'
             ])
     )
     ->runAndTraverse();
